@@ -7,66 +7,48 @@ on:
       - dev
 
 jobs:
-  # ssh-init:
-  #   name: Set up SSH Key
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - run: |
-  #         which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )
-  #         eval $(ssh-agent -s)
-  #         mkdir -p ~/.ssh
-  #         mkdir -p ~/.ssh
-  #         chmod 700 ~/.ssh
-  #         echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-  #         chmod 600 ~/.ssh/id_rsa
-  #         ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-  #         chmod 644 ~/.ssh/known_hosts
-  # build:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Checkout Repository
-  #     uses: actions/checkout@v3
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
-  #   - name: Build Docker Image
-  #     run: docker build -t ${{ github.event.repository.name }} .
+    - name: Build Docker Image
+      run: docker build -t ${{ github.event.repository.name }} .
     
-  # push-docker-image-to-dev:
-  #   name: Push Docker Image to Dev Registry
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - if: github.ref == 'refs/heads/dev'
-  #       run: |
-  #         echo ${{ secrets.DOCKER_PASSWORD_DEV }} | docker login -u ${{ secrets.DOCKER_USERNAME_DEV }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest
+  push-docker-image-to-dev:
+    needs: build
+    name: Push Docker Image to Dev Registry
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.ref == 'refs/heads/dev'
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD_DEV }} | docker login -u ${{ secrets.DOCKER_USERNAME_DEV }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest
 
-  # push-docker-image-to-main:
-  #   name: Push Docker Image to Main Registry
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - if: github.ref == 'refs/heads/main'
-  #       run: |
-  #         echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
+  push-docker-image-to-main:
+    needs: build
+    name: Push Docker Image to Main Registry
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.ref == 'refs/heads/main'
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
   
-  # deploy-to-dev:
-  #   name: Deploy to Dev Server
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - if: github.ref == 'refs/heads/dev'
-  #       run: |
-  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.DEV_IP_SERVER }} "docker pull your-dev-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
-  
-  # deploy-to-main:
-  #   name: Deploy to Main Server
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - 
-  #       if: github.ref == 'refs/heads/dev'
-  #       run: |
-  #         chmod +x ./scripts/ssh_init.sh
-  #         bash ./scripts/ssh_init.sh
-  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
-       
+  deploy-to-dev:
+    needs: push-docker-image-to-dev
+    name: Deploy to Dev Server
+    runs-on: ubuntu-latest
+    steps:
+      - if: github.ref == 'refs/heads/dev'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_IP_SERVER }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+
   deploy-to-main:
+    needs: push-docker-image-to-main
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
