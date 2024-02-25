@@ -71,12 +71,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      
       - 
         if: github.ref == 'refs/heads/main'
         name: Init SSH
         run: |
           chmod +x ./scripts/ssh_init.sh
-          ./scripts/ssh_init.sh
+          ./scripts/ssh_init.sh "${{ secrets.SSH_PRIVATE_KEY }}"
           ssh ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
         shell: bash
       - 
