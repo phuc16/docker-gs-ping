@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 
 jobs:
   build:
@@ -23,7 +27,7 @@ jobs:
     steps:
       - if: github.ref == 'refs/heads/dev'
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD_DEV }} | docker login -u ${{ secrets.DOCKER_USERNAME_DEV }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest
+          echo ${{ secrets.DOCKER_PASSWORD_DEV }} | docker login -u ${{ secrets.DOCKER_USERNAME_DEV }} --password-stdin && docker push ${{ github.event.repository.name }}:latest
 
   push-docker-image-to-main:
     needs: build
@@ -32,7 +36,7 @@ jobs:
     steps:
       - if: github.ref == 'refs/heads/main'
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin && docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
+          echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin && docker push ${{ github.event.repository.name }}:latest
   
   deploy-to-dev:
     needs: push-docker-image-to-dev
