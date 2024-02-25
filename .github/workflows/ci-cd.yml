@@ -70,18 +70,14 @@ jobs:
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      
+      - uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.MAIN_IP_SERVER }}
+          username: ubuntu
+          port: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: whoami
       - 
         if: github.ref == 'refs/heads/main'
         name: Init SSH
         run: |
-          chmod +x ./scripts/ssh_init.sh
-          ./scripts/ssh_init.sh "${{ secrets.SSH_PRIVATE_KEY }}"
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
-        shell: bash
-      - 
-        if: github.ref == 'refs/heads/dev'
-        name: Deploy
-        run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"       
+          ls
