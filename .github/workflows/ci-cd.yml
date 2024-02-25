@@ -58,11 +58,16 @@ jobs:
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - if: github.ref == 'refs/heads/main'
-        name: Run script file
+      - 
+        if: github.ref == 'refs/heads/main'
+        name: Init SSH
         run: |
           chmod +x ./scripts/ssh_init.sh
           ./scripts/ssh_init.sh
         shell: bash
+      - 
+        if: github.ref == 'refs/heads/dev'
+        name: Deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull your-dev-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
        
