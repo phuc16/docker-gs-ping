@@ -37,8 +37,8 @@ jobs:
       - if: github.ref == 'refs/heads/main'
         run: |
           echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin 
-          docker tag ${{ github.event.repository.name }} ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
-          docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
+          docker tag ${{ github.event.repository.name }} ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}
+          docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}
   
   deploy-to-dev:
     needs: push-docker-image-to-dev
@@ -51,7 +51,7 @@ jobs:
           host: ${{ secrets.DEV_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+          script: docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
 
   deploy-to-main:
     needs: push-docker-image-to-main
@@ -64,4 +64,4 @@ jobs:
           host: ${{ secrets.MAIN_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+          script: docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
