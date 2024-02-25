@@ -64,20 +64,16 @@ jobs:
   #       run: |
   #         chmod +x ./scripts/ssh_init.sh
   #         bash ./scripts/ssh_init.sh
-  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} " && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
+  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
        
   deploy-to-main:
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
-      - uses: appleboy/ssh-action@v1.0.3
+      - if: github.ref == 'refs/heads/main'
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.MAIN_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: whoami
-      - 
-        if: github.ref == 'refs/heads/main'
-        name: Init SSH
-        run: |
-          ls
+          script: docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
