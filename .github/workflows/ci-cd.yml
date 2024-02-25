@@ -36,7 +36,9 @@ jobs:
     steps:
       - if: github.ref == 'refs/heads/main'
         run: |
-          echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin && docker push ${{ github.event.repository.name }}:latest
+          echo ${{ secrets.DOCKER_PASSWORD_MAIN }} | docker login -u ${{ secrets.DOCKER_USERNAME_MAIN }} --password-stdin 
+          docker tag ${{ github.event.repository.name }} ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
   
   deploy-to-dev:
     needs: push-docker-image-to-dev
