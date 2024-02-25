@@ -61,6 +61,7 @@ jobs:
       - if: github.ref == 'refs/heads/main'
         run: |
           pwd
+          ls -R
           chmod +x ./scripts/ssh_init.sh
           bash ./scripts/ssh_init.sh "${{ secrets.SSH_PRIVATE_KEY }}"
           ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull your-main-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
