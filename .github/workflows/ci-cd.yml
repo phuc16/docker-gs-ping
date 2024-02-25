@@ -74,7 +74,7 @@ jobs:
         with:
           host: ${{ secrets.MAIN_IP_SERVER }}
           username: ubuntu
-          port: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: whoami
       - 
         if: github.ref == 'refs/heads/main'
