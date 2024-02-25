@@ -54,31 +54,32 @@ jobs:
   #       run: |
   #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.DEV_IP_SERVER }} "docker pull your-dev-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
   
+  # deploy-to-main:
+  #   name: Deploy to Main Server
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - 
+  #       if: github.ref == 'refs/heads/dev'
+  #       run: |
+  #         chmod +x ./scripts/ssh_init.sh
+  #         bash ./scripts/ssh_init.sh
+  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} " && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
+       
   deploy-to-main:
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - if: github.ref == 'refs/heads/dev'
+      - 
+        if: github.ref == 'refs/heads/main'
+        name: Init SSH
         run: |
           chmod +x ./scripts/ssh_init.sh
-          bash ./scripts/ssh_init.sh
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull your-dev-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
-       
-  # deploy-to-main:
-  #   name: Deploy to Main Server
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - 
-  #       if: github.ref == 'refs/heads/main'
-  #       name: Init SSH
-  #       run: |
-  #         chmod +x ./scripts/ssh_init.sh
-  #         ./scripts/ssh_init.sh
-  #       shell: bash
-  #     - 
-  #       if: github.ref == 'refs/heads/dev'
-  #       name: Deploy
-  #       run: |
-  #         ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull your-dev-registry/your-docker-image-name:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
-       
+          ./scripts/ssh_init.sh
+        shell: bash
+      - 
+        if: github.ref == 'refs/heads/dev'
+        name: Deploy
+        run: |
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} " && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"       
