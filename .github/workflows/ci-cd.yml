@@ -77,9 +77,10 @@ jobs:
         run: |
           chmod +x ./scripts/ssh_init.sh
           ./scripts/ssh_init.sh
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"
         shell: bash
       - 
         if: github.ref == 'refs/heads/dev'
         name: Deploy
         run: |
-          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} " && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"       
+          ssh -i ~/.ssh/id_rsa ubuntu@${{ secrets.MAIN_IP_SERVER }} "docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d"       
