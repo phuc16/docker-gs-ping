@@ -15,11 +15,11 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	e.GET("/", func(c echo.Context) error {
+	e.GET("/api", func(c echo.Context) error {
 		return c.HTML(http.StatusOK, "Hello, Docker! <3 dev new new")
 	})
 
-	e.GET("/health", func(c echo.Context) error {
+	e.GET("/api/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, struct{ Status string }{Status: "OK"})
 	})
 
