@@ -81,4 +81,4 @@ jobs:
           host: ${{ secrets.MAIN_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: export $(cat .env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+          script: cd ${{ secrets.WORK_DIR }} && export $(cat .env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }} && docker-compose -f docker-compose.yml up -d
