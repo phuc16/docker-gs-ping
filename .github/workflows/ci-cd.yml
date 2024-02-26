@@ -12,6 +12,7 @@ on:
 
 jobs:
   publish-docker-image-to-dev:
+      if: github.ref == 'refs/heads/dev'
       name: Build and Push Docker Image to Dev Registry
       runs-on: ubuntu-latest
 
@@ -35,6 +36,7 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }}:latest
 
   publish-docker-image-to-main:
+      if: github.ref == 'refs/heads/main'
       name: Build and Push Docker Image to Main Registry
       runs-on: ubuntu-latest
 
@@ -58,27 +60,27 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }}:latest
   
   deploy-to-dev:
+    if: github.ref == 'refs/heads/dev'
     needs: publish-docker-image-to-dev
     name: Deploy to Dev Server
     runs-on: ubuntu-latest
     steps:
-      - if: github.ref == 'refs/heads/dev'
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.DEV_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd ${{ secrets.WORK_DIR }} && export $(cat .env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+          script: export $(cat ${{ secrets.WORK_DIR }}/.env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
 
   deploy-to-main:
+    if: github.ref == 'refs/heads/main'
     needs: publish-docker-image-to-main
     name: Deploy to Main Server
     runs-on: ubuntu-latest
     steps:
-      - if: github.ref == 'refs/heads/main'
-        uses: appleboy/ssh-action@v1.0.3
+      - uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.MAIN_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd ${{ secrets.WORK_DIR }} && export $(cat .env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }} && docker-compose -f docker-compose.yml up -d
+          script: export $(cat ${{ secrets.WORK_DIR }}/.env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_MAIN }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
