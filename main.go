@@ -20,7 +20,7 @@ func main() {
 	})
 
 	e.GET("/api/health", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, struct{ Status string }{Status: "OK"})
+		return c.JSON(http.StatusOK, struct{ Status string }{Status: "OK dev"})
 	})
 
 	httpPort := os.Getenv("PORT")
