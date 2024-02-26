@@ -68,7 +68,7 @@ jobs:
           host: ${{ secrets.DEV_IP_SERVER }}
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: cd ${{ secrets.WORK_DIR }} && docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
+          script: cd ${{ secrets.WORK_DIR }} && export $(cat .env | xargs) && docker pull ${{ secrets.DOCKER_USERNAME_DEV }}/${{ github.event.repository.name }} && docker-compose -f ${{ secrets.WORK_DIR }}/docker-compose.yml up -d
 
   deploy-to-main:
     needs: publish-docker-image-to-main
