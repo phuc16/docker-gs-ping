@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  soc-api:
+  api:
     image: ${DOCKER_REGISTRTY_SERVER}/docker-gs-ping
     restart: always
     ports:
